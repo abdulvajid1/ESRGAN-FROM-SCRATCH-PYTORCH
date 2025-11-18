@@ -69,25 +69,46 @@ class Generator(nn.Module):
         out1 = self.initial(x)
         body_out = self.body(out1) + out1
         out = self.head(body_out)
-        return out
+        return F.tanh(out)
 
 class Discriminator(nn.Module):
-    def __init__(self, input_dim):
+    def __init__(self, input_dim, num_blocks=3):
         super(Discriminator, self).__init__()
+        self.initial = nn.Conv2d(input_dim, 64, kernel_size=3, stride=1, padding=1)
+
+        self.dense_layers = nn.Sequential(
+            *[DenseBlock() for _ in range(num_blocks)]
+            )
+        
+        self.final = nn.Sequential(
+            nn.Conv2d(64, 512, kernel_size=3, stride=1, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.AdaptiveAvgPool2d((6, 6)),
+            nn.Conv2d(512, 1, kernel_size=1, stride=1, padding=0),
+            )
 
     def forward(self, x):
-        pass
+        out = self.initial(x)
+        out = self.dense_layers(out)
+        out = self.final(out)
+        return out
 
 
 
 def main():
-    model = Generator(input_dim=3)
-    device = 'cpu'
-    model.to(device)
+    generator = Generator(input_dim=3)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    generator.to(device)
     x = torch.randn((1, 3, 128, 128)).to(device)
-    out = model(x)
+    out = generator(x)
     print("Input Shape", x.shape)
     print("Out shape", out.shape)
+
+    discriminator = Discriminator(input_dim=3)
+    discriminator.to(device)
+    disc_out = discriminator(out)
+    print("Discriminator Out shape", disc_out.shape)
+
 
 if __name__ == "__main__":
     main()
