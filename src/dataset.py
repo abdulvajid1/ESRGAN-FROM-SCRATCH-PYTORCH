@@ -11,6 +11,7 @@ from albumentations.pytorch import ToTensorV2
 both_transform = A.Compose([
     A.RandomCrop(height=IMG_SIZE, width=IMG_SIZE),
     A.HorizontalFlip(p=0.5),
+    A.RandomRotate90(p=0.5)
 ])
 
 highres_transform = A.Compose([
@@ -45,12 +46,6 @@ def get_dataloader(batch_size=config.BATCH_SIZE, num_workers=config.DATALOADER_W
     
 
 if __name__ == "__main__":
-    arr = np.random.randint(low=0, high=255, size=(512, 512, 3)).astype(np.uint8)
-    print(lowres_transform(image=arr)['image'].shape)
-    print(highres_transform(image=arr)['image'].shape)
-    print(both_transform(image=arr)['image'].shape)
-    print(lowres_transform(image=arr)['image'].min())
-    print(lowres_transform(image=arr)['image'].max())
 
     dataloader = get_dataloader()
     for high, low in dataloader:

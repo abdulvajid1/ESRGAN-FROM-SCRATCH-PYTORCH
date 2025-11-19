@@ -2,3 +2,6 @@ IMG_SIZE = 512
 BATCH_SIZE = 2
 PIN_MEMORY = True
 DATALOADER_WORKERS = 2 
+genr_LR = 1e-4
+disc_LR = 1e-5
+EPOCH = 100
