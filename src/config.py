@@ -4,4 +4,4 @@ PIN_MEMORY = True
 DATALOADER_WORKERS = 2 
 genr_LR = 1e-4
 disc_LR = 1e-5
-EPOCH = 100
+NUM_EPOCHS = 100
