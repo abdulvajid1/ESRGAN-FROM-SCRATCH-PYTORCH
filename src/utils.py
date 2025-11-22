@@ -103,5 +103,5 @@ def load_checkpoint(generator, discriminator, gen_optimizer, disc_optimizer, pre
         if "disc_optimizer" in ckpt and disc_optimizer is not None:
             disc_optimizer.load_state_dict(ckpt["disc_optimizer"])
 
-    return ckpt.get("global_step", None)
+    return ckpt.get("global_step", None), latest
         

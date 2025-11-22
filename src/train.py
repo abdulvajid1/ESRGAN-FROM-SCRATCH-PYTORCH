@@ -93,6 +93,8 @@ def train(generator, discriminator, genr_optimizer: torch.optim.Adam, disc_optim
             "genr_loss": f"{l1_loss.item(): .5f}",
             # "desc_loss": f"{disc_relative_loss.item(): .5f}", # TODO uncomment for finetune
         })
+    
+    return global_step
         
 
 
@@ -113,18 +115,19 @@ def main(args):
     discriminator = torch.compile(discriminator).train()
     logging.info("Loaded both Models")
 
-    genr_optimizer = optim.Adam(generator.parameters(), lr=config.genr_LR)
-    disc_optimizer = optim.Adam(discriminator.parameters(), lr=config.disc_LR)
+    genr_optimizer = optim.Adam(generator.parameters(), lr=config.genr_LR, fused=True)
+    disc_optimizer = optim.Adam(discriminator.parameters(), lr=config.disc_LR, fused=True)
     logging.info("Setup both Optimizer")
     global_step = None
     if args.load:
-        global_step = load_checkpoint(generator, discriminator, genr_optimizer, disc_optimizer, pretrain=True)
+        global_step, latest = load_checkpoint(generator, discriminator, genr_optimizer, disc_optimizer, pretrain=True)
         logging.info(f"Restarting from Global step {global_step}")
+        logging.info(f"Loading from latest checkpoint {latest}")
     else:
         logging.info(f"Global Step 1")
 
     for epoch in range(0, config.NUM_EPOCHS):
-        train(generator, discriminator, genr_optimizer, disc_optimizer, dataloader, device, epoch, global_step=global_step, save_step=100)
+        global_step = train(generator, discriminator, genr_optimizer, disc_optimizer, dataloader, device, epoch, global_step=global_step, save_step=100)
 
 
 if __name__ == "__main__":
